@@ -57,11 +57,6 @@ provider "coder" {
 data "coder_workspace" "me" {
 }
 
-resource "coder_agent" "dev" {
-  arch = var.step2_arch
-  os   = "linux"
-}
-
 variable "docker_image" {
   description = "What Docker image would you like to use for your workspace?"
   default     = "base"
@@ -78,6 +73,20 @@ variable "docker_image" {
     condition     = fileexists("images/${var.docker_image}.Dockerfile")
     error_message = "Invalid Docker image. The file does not exist in the images directory."
   }
+}
+
+variable dotfiles_uri {
+  description = <<-EOF
+  Optional: enter dotfiles repo URI
+  EOF
+
+  default = ""
+}
+
+resource "coder_agent" "dev" {
+  arch = var.step2_arch
+  os   = "linux"
+  startup_script = var.dotfiles_uri != "" ? "/bin/sh coder dotfiles -y ${var.dotfiles_uri}" : null
 }
 
 resource "docker_volume" "home_volume" {
