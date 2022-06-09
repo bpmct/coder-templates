@@ -1,10 +1,10 @@
 ---
-name: Develop in Docker with custom image builds
+name: Desktop containers for Coder
 description: Build images and run workspaces on the Docker host with no image registry required
 tags: [local, docker]
 ---
 
-# docker-image-builds
+# desktop-container
 
 This example bundles Dockerfiles with the Coder template, allowing the Docker host to build images itself instead of relying on an external registry.
 
