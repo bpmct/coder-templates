@@ -7,8 +7,6 @@ terraform {
   }
 }
 
-# Last updated 2022-05-31
-# aws ec2 describe-regions | jq -r '[.Regions[].RegionName] | sort'
 variable "region" {
   description = "What region should your workspace live in?"
   default     = "us-west-2"
@@ -18,6 +16,19 @@ variable "region" {
       "us-west-2"
     ], var.region)
     error_message = "Invalid region!"
+  }
+}
+
+variable "type" {
+  description = "Instance type"
+  default     = "t3.large"
+  validation {
+    condition = contains([
+      "t3.large",
+      "t3.xlarge",
+      "t3.2xlarge"
+    ], var.type)
+    error_message = "Invalid type!"
   }
 }
 
@@ -126,9 +137,10 @@ EOT
 }
 
 resource "aws_spot_instance_request" "dev" {
-  ami               = data.aws_ami.ubuntu.id
-  availability_zone = "${var.region}a"
-  instance_type     = "t3.xlarge"
+  ami                            = data.aws_ami.ubuntu.id
+  availability_zone              = "${var.region}a"
+  instance_type                  = var.type
+  instance_interruption_behavior = "stop"
 
   wait_for_fulfillment = true
 
