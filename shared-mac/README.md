@@ -35,10 +35,10 @@ This template is incomplete. The following work is planned:
     - I ran into some initial issues with this, but I think I
     could get it working with `nohup` and some EOFs.
 
-- Optionally create system user based on Coder username
+- Optionally create system users based on Coder username
 
     - should be a template-wide setting so it doesn't
-    introduce complexity for a one-user Mac
+    introduce complexity for a one-user Mac setups
     (ref: ./create_user.sh)
-    - Delete system user if workspace is being terminated
-    - Stop proper agent process. Not all of them
+    - delete system user if workspace is being terminated
+    - stop proper agent process. Not all of them
