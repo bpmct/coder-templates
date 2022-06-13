@@ -25,6 +25,13 @@ You must already have a Mac machine with:
 
 - Optional: [VNC enabled](https://support.apple.com/guide/remote-desktop/set-up-a-computer-running-vnc-software-apdbed09830/mac#:~:text=On%20the%20client%20computer%2C%20choose,VNC%20password%2C%20then%20click%20OK.) for desktop access
 
+## VNC
+
+While I recommend using native IDE over SSH whenever possible, VNC has been great
+for iOS simulators, configuring XCode, or other desktop-only applications.
+
+Any modern VNC client should work. Use `coder port-forward <workspace-name> --tcp 5900:5900` to forward the VNC server to your `localhost`. 
+
 ## TODO
 
 This template is incomplete. The following work is planned:
