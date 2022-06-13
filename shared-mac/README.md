@@ -25,7 +25,7 @@ You must already have a Mac machine with:
 
 - SSH server reachable by machine running `coder server`
 
-    - I use [Tailscale](https://tailscale.com) to keep my home network private.
+    - I use [Tailscale](https://tailscale.com) to keep my home network private
 
 - Optional: [VNC enabled](https://support.apple.com/guide/remote-desktop/set-up-a-computer-running-vnc-software-apdbed09830/mac#:~:text=On%20the%20client%20computer%2C%20choose,VNC%20password%2C%20then%20click%20OK.) for desktop access
 
