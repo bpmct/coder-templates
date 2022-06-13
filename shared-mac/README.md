@@ -7,9 +7,9 @@ tags: [dedicated, unix]
 # mac-mini
 
 This template gives developers access to an existing Mac machine you maintain. Great for 
-MacOS-only workloads such as iOS development, XCode, etc.
+MacOS-only workloads such as iOS evelopment, XCode, etc.
 
-![Developing an iOS app on a Linux thinkpad](https://raw.githubusercontent.com/bpmct/coder-templates/main/main/metadata/shared-mac-01.png)
+![Developing an iOS app on a Linux thinkpad](https://raw.githubusercontent.com/bpmct/coder-templates/main/metadata/shared-mac-01.png)
 
 > Developing iOS apps on a remote Mac Mini. Using a Linux Thinkpad.
 
