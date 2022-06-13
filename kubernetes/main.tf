@@ -59,6 +59,20 @@ resource "coder_agent" "ubuntu" {
   dir  = "/home/vscode"
 }
 
+variable "api_token" {
+  description = <<EOF
+  API token for web app.
+
+  More info at: https://example.com/docs/admin/tokens
+  EOF
+  default     = ""
+}
+
+variable "disk_size" {
+  description = "Disk size (__ GB)"
+  default     = 10
+}
+
 resource "kubernetes_pod" "main" {
   count = data.coder_workspace.me.start_count
   depends_on = [
@@ -84,6 +98,10 @@ resource "kubernetes_pod" "main" {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.go.token
       }
+      env {
+        name  = "API_TOKEN"
+        value = var.api_token
+      }
       volume_mount {
         mount_path = "/home/vscode"
         name       = "home-directory"
@@ -100,6 +118,10 @@ resource "kubernetes_pod" "main" {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.java.token
       }
+      env {
+        name  = "API_TOKEN"
+        value = var.api_token
+      }
       volume_mount {
         mount_path = "/home/vscode"
         name       = "home-directory"
@@ -115,6 +137,10 @@ resource "kubernetes_pod" "main" {
       env {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.ubuntu.token
+      }
+      env {
+        name  = "API_TOKEN"
+        value = var.api_token
       }
       volume_mount {
         mount_path = "/home/vscode"
@@ -139,8 +165,7 @@ resource "kubernetes_persistent_volume_claim" "home-directory" {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        # TODO: turn these into variables
-        storage = "10Gi"
+        storage = "${var.disk_size}Gi"
       }
     }
   }
