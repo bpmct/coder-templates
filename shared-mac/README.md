@@ -4,7 +4,7 @@ description: Connect a pre-provisioned Mac device and provision system users as 
 tags: [dedicated, unix]
 ---
 
-# mac-mini
+# shared-mac
 
 This template gives developers access to an existing Mac machine you maintain. Great for 
 MacOS-only workloads such as iOS evelopment, XCode, etc.
