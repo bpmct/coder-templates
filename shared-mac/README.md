@@ -11,7 +11,7 @@ MacOS-only workloads such as iOS evelopment, XCode, etc.
 
 ![Developing an iOS app on a Linux thinkpad](https://raw.githubusercontent.com/bpmct/coder-templates/main/metadata/shared-mac-01.png)
 
-> Developing iOS apps on a remote Mac Mini. Using a Linux Thinkpad.
+> Developing iOS apps on a remote Mac Mini. Connecting from a Linux Thinkpad as the "client."
 
 To get started, run `coder templates init`. When prompted, select this template. Follow the on-screen instructions to proceed.
 
@@ -32,9 +32,7 @@ You must already have a Mac machine with:
 ## VNC
 
 While I recommend using native IDE over SSH whenever possible, VNC has been great
-for iOS simulators, configuring XCode, or other desktop-only applications.
-
-Any modern VNC client should work. Use `coder port-forward <workspace-name> --tcp 5900:5900` to forward the VNC server to your `localhost`. 
+for iOS simulators, configuring XCode, or other desktop-only applications. Any modern VNC client should work. Use `coder port-forward <workspace-name> --tcp 5900:5900` to forward the VNC server to your `localhost`. 
 
 ## TODO
 
