@@ -6,10 +6,14 @@ tags: [dedicated, unix]
 
 # mac-mini
 
-Thie templates gives developers access to an existing Mac machine you maintain.
+This template gives developers access to an existing Mac machine you maintain. Great for 
+MacOS-only workloads such as iOS development, XCode, etc.
+
+![Developing an iOS app on a Linux thinkpad](https://raw.githubusercontent.com/bpmct/coder-templates/main/main/metadata/shared-mac-01.png)
+
+> Developing iOS apps on a remote Mac Mini. Using a Linux Thinkpad.
 
 To get started, run `coder templates init`. When prompted, select this template. Follow the on-screen instructions to proceed.
-
 
 ## Requirements
 
