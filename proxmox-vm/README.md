@@ -12,7 +12,7 @@ Pick this template in `coder templates init` and follow instructions.
 
 ## Authentication
 
-Coder will authenticate with the [PM_API_` environment variables](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-connection-via-username-and-api-token). Ensure you have these set before you run `coder server` or in
+Coder will authenticate with the [PM_API_ environment variables](https://registry.terraform.io/providers/Telmate/proxmox/latest/docs#creating-the-connection-via-username-and-api-token). Ensure you have these set before you run `coder server` or in
 `/etc/coder.d/coder.env` if you are running Coder as a system service.
 
 ## How it works
