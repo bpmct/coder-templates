@@ -15,12 +15,10 @@ terraform {
 resource "coder_app" "code-server" {
   agent_id      = coder_agent.dev.id
   name          = "code-server"
-  icon          = "https://cdn.icon-icons.com/icons2/2107/PNG/512/file_type_vscode_icon_130084.png"
+  icon          = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/2560px-Visual_Studio_Code_1.35_icon.svg.png"
   url           = "http://localhost:13337"
   relative_path = true
 }
-
-
 
 data "coder_workspace" "me" {
 }
@@ -32,18 +30,88 @@ resource "coder_agent" "dev" {
   os             = "linux"
   startup_script = <<EOT
 #!/bin/sh
-export HOME=/home/${lower(data.coder_workspace.me.owner)}
 curl -fsSL https://code-server.dev/install.sh | sh
-code-server --auth none --port 13337
+code-server --auth none --port 13337 &
   EOT
 }
 
+variable "proxmox_api_auth_info" {
+  description = <<EOF
+  Coder will try to authenticate to Proxmox with PM_API_
+  environment variables on the Coder server. See:
+  https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
+
+  To authenticate with another method, edit this template (`main.tf`)
+
+  Press ENTER to continue
+  EOF
+
+  sensitive = true
+}
+
+variable "proxmox_api_url" {
+  description = <<EOF
+  Proxmox API URL. Often ends in /api2/json
+
+  If you specified PM_API_URL, press ENTER to skip
+  EOF
+  sensitive   = true
+}
+
+variable "proxmox_api_insecure" {
+  description = <<EOF
+  Select "true" if you have an invalid TLS certificate
+  
+  Disable TLS verification?
+  EOF
+
+  validation {
+    condition = contains([
+      "true",
+      "false"
+    ], var.proxmox_api_insecure)
+    error_message = "Specify true or false."
+  }
+  sensitive = true
+}
+
+variable "vm_target_node" {
+  description = "VM target node (often \"proxmox\")"
+  sensitive   = true
+}
+
+variable "vm_cloudinit_ipconfig0" {
+  description = <<EOF
+  ipconfig0 for VM
+  
+  e.g `ip=dhcp` or `ip=10.0.2.99/16,gw=10.0.2.2`
+  see: https://registry.terraform.io/providers/Telmate/proxmox/latest/docs/resources/vm_qemu#top-level-block
+  EOF
+
+  sensitive = true
+}
+
+provider "proxmox" {
+  pm_api_url      = var.proxmox_api_url != "" ? var.proxmox_api_url : null
+  pm_tls_insecure = tobool(var.proxmox_api_insecure)
+
+  # We recommend authenticating via
+  # environment variables, but you can
+  # also specify variables here :)
+
+  # For debugging Terraform provider errors:
+  # pm_log_enable = true
+  # pm_log_file   = "/var/log/terraform-plugin-proxmox.log"
+  # pm_debug      = true
+  # pm_log_levels = {
+  #   _default    = "debug"
+  #   _capturelog = ""
+  # }
+}
+
+# Cloud-init data for VM to auto-start Coder
 locals {
-
-  # User data is used to stop/start AWS instances. See:
-  # https://github.com/hashicorp/terraform-provider-aws/issues/22
-
-  user_data_start = <<EOT
+  user_data = <<EOT
 Content-Type: multipart/mixed; boundary="//"
 MIME-Version: 1.0
 
@@ -73,59 +141,9 @@ export CODER_AGENT_TOKEN=${coder_agent.dev.token}
 sudo --preserve-env=CODER_AGENT_TOKEN -u ${lower(data.coder_workspace.me.owner)} /bin/bash -c '${coder_agent.dev.init_script}'
 --//--
 EOT
-
-  user_data_end = <<EOT
-Content-Type: multipart/mixed; boundary="//"
-MIME-Version: 1.0
-
---//
-Content-Type: text/cloud-config; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="cloud-config.txt"
-
-#cloud-config
-cloud_final_modules:
-- [scripts-user, always]
-
---//
-Content-Type: text/x-shellscript; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="userdata.txt"
-
-#!/bin/bash
-sudo shutdown -h now
---//--
-EOT
 }
 
-# https://yetiops.net/posts/proxmox-terraform-cloudinit-saltstack-prometheus/
-
-variable "pm_api_url" {
-  sensitive = true
-}
-
-variable "pm_api_token_id" {
-  sensitive = true
-}
-
-variable "pm_api_token_secret" {
-  sensitive = true
-}
-
-variable "pm_tls_insecure" {
-  sensitive = true
-  default   = true
-}
-
-provider "proxmox" {
-  pm_api_url          = var.pm_api_url
-  pm_api_token_id     = var.pm_api_token_id
-  pm_api_token_secret = var.pm_api_token_secret
-  pm_tls_insecure     = true
-}
-
+# Copy the generated cloud_init config to the Proxmox node
 resource "null_resource" "cloud_init_config_files" {
   count = 1
   connection {
@@ -135,89 +153,124 @@ resource "null_resource" "cloud_init_config_files" {
     private_key = file("/root/.ssh/id_rsa")
   }
 
-  provisioner "file" {
-    source      = local_file.cloud_init_user_data_file[count.index].filename
-    destination = "/var/lib/vz/snippets/user_data_vm-${count.index}.yml"
+  provisioner "remote-exec" {
+    inline = [<<EOT
+cat << 'EOF' > "/var/lib/vz/snippets/user_data_vm-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}.yml"
+${local.user_data}
+EOF
+    EOT
+    ]
+
   }
 }
 
-# /* Configure Cloud-Init User-Data with custom config file */
-# resource "proxmox_vm_qemu" "cloudinit-test" {
-#   count = 1
-#   depends_on = [
-#     null_resource.cloud_init_config_files,
-#   ]
+variable "clone_template" {
+  default     = "ubuntu-2004-cloudinit-template"
+  description = <<EOF
+  Coder requires a cloud-init compatible Proxmox template.
 
-#   name        = "tftest1"
-#   desc        = "tf description"
-#   target_node = "proxmox"
+  (You can edit this template to specify more images and remove this message)
 
-#   clone = "ubuntu2004-cloud-output"
+  See the docs:
+  https://github.com/coder/coder/tree/main/examples/templates/proxmox-vm
 
-#   storage = "local-lvm"
-#   cores   = 2
-#   sockets = 2
-#   memory  = 2048
-#   disk_gb = 4
-#   nic     = "virtio"
-#   bridge  = "vmbr0"
+  Follow this guide to add an Ubuntu 20.04 cloud-init template:
+  https://austinsnerdythings.com/2021/08/30/how-to-create-a-proxmox-ubuntu-cloud-init-image/
 
-#   ssh_user        = "root"
-#   ssh_private_key = <<EOF
-# -----BEGIN RSA PRIVATE KEY-----
-# private ssh key root
-# -----END RSA PRIVATE KEY-----
-# EOF
+  Specify the name of the VM template to clone:
+  EOF
 
-#   os_type   = "cloud-init"
-#   ipconfig0 = "ip=10.0.2.99/16,gw=10.0.2.2"
-
-#   /*
-#     sshkeys and other User-Data parameters are specified with a custom config file.
-#     In this example each VM has its own config file, previously generated and uploaded to
-#     the snippets folder in the local storage in the Proxmox VE server.
-#   */
-#   cicustom = "user=local:snippets/user_data_vm-${count.index}.yml"
-#   /* Create the Cloud-Init drive on the "local-lvm" storage */
-#   cloudinit_cdrom_storage = "local-lvm"
-
-#   # provisioner "remote-exec" {
-#   #   inline = [
-#   #     "ip a"
-#   #   ]
-#   # }
-# }
-
-/* Null resource that generates a cloud-config file per vm */
-data "template_file" "user_data" {
-  count    = 1
-  template = file("${path.module}/files/user_data.cfg")
-  vars = {
-    pubkey   = file(pathexpand("~/.ssh/id_rsa.pub"))
-    hostname = "vm-${count.index}"
-    fqdn     = "vm-${count.index}.lan"
+  validation {
+    condition     = contains(["ubuntu-2004-cloudinit-template"], var.clone_template)
+    error_message = "Invalid clone_template."
   }
 }
 
-resource "local_file" "cloud_init_user_data_file" {
-  count    = 1
-  content  = data.template_file.user_data[count.index].rendered
-  filename = "${path.module}/files/user_data_${count.index}.cfg"
+variable "disk_size" {
+  default = 10
+  validation {
+    condition = (
+      var.disk_size >= 5 &&
+      var.disk_size <= 100
+    )
+    error_message = "Disk size must be integer between 5 and 100 (GB)."
+  }
+}
+
+variable "cpu_cores" {
+  default = 1
+  validation {
+    condition = (
+      var.cpu_cores >= 1 &&
+      var.cpu_cores <= 8
+    )
+    error_message = "CPU cores must be integer between 1 and 8."
+  }
+}
+
+variable "sockets" {
+  default = 1
+  validation {
+    condition = (
+      var.sockets >= 1 &&
+      var.sockets <= 2
+    )
+    error_message = "Sockets must be integer between 1 and 2."
+  }
+}
+
+variable "memory" {
+  default = "2048"
+  validation {
+    condition = contains([
+      "1024",
+      "2048",
+      "3072",
+      "4098",
+      "6144"
+    ], var.memory)
+    error_message = "Invalid memory value."
+  }
 }
 
 
-# resource "aws_spot_instance_request" "dev" {
-#   ami                            = data.aws_ami.ubuntu.id
-#   availability_zone              = "${var.region}a"
-#   instance_type                  = var.type
-#   instance_interruption_behavior = "stop"
+# Provision the proxmox VM
+resource "proxmox_vm_qemu" "cloudinit-test" {
+  count = 1
+  depends_on = [
+    null_resource.cloud_init_config_files,
+  ]
 
-#   wait_for_fulfillment = true
+  name        = replace("${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}", " ", "_")
+  target_node = var.vm_target_node
 
-#   user_data = data.coder_workspace.me.transition == "start" ? local.user_data_start : local.user_data_end
-#   tags = {
-#     Name = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
-#     # Required if you are using our example policy, see template README
-#     Coder_Provisioned = "true"
-#   }
-# }
+  # Image to clone
+  clone = var.clone_template
+
+  cores   = parseint(var.cpu_cores, 10)
+  sockets = parseint(var.sockets, 10)
+  memory  = parseint(var.memory, 10)
+  cpu     = "kvm64"
+  disk {
+    slot    = 0
+    size    = "${parseint(var.disk_size, 10)}G"
+    type    = "scsi"
+    storage = "local-lvm"
+  }
+  nic      = "virtio"
+  bootdisk = "scsi0"
+  bridge   = "vmbr0"
+  agent    = 1
+
+  os_type   = "cloud-init"
+  ipconfig0 = var.vm_cloudinit_ipconfig0
+
+
+  # Mount the custom cloud init config we copied to the Proxmox node
+  cicustom                = "user=local:snippets/user_data_vm-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}.yml"
+  cloudinit_cdrom_storage = "local-lvm"
+
+  # Use these for debugging workspaces you cannot SSH into
+  # ssshkeys = [""]
+
+}
