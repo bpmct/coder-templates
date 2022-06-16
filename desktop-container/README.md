@@ -1,6 +1,6 @@
 ---
 name: Desktop containers for Coder
-description: Build images and run workspaces on the Docker host with no image registry required
+description: Build images and run desktop workspaces on the Docker host with no image registry required
 tags: [local, docker]
 ---
 
