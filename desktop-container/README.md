@@ -10,9 +10,17 @@ This example bundles Dockerfiles with the Coder template, allowing the Docker ho
 
 For large use cases, we recommend building images using CI/CD pipelines and registries instead of at workspace runtime. However, this example is practical for tinkering and iterating on Dockerfiles.
 
+## Requirements
+
+Docker running on the Coder server.
+
 ## Getting started
 
-Run `coder templates init` and select this template. Follow the instructions that appear.
+```sh
+git clone https://github.com/bpmct/coder-templates.git
+cd desktop-container
+coder projects create
+```
 
 ## Adding images
 
