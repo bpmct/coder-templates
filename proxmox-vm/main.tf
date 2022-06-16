@@ -100,17 +100,19 @@ provider "proxmox" {
   # also specify variables here :)
 
   # For debugging Terraform provider errors:
-  # pm_log_enable = true
-  # pm_log_file   = "/var/log/terraform-plugin-proxmox.log"
-  # pm_debug      = true
-  # pm_log_levels = {
-  #   _default    = "debug"
-  #   _capturelog = ""
-  # }
+  pm_log_enable = true
+  pm_log_file   = "/var/log/terraform-plugin-proxmox.log"
+  pm_debug      = true
+  pm_log_levels = {
+    _default    = "debug"
+    _capturelog = ""
+  }
 }
 
 # Cloud-init data for VM to auto-start Coder
 locals {
+
+  vm_name   = replace("${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}", " ", "_")
   user_data = <<EOT
 Content-Type: multipart/mixed; boundary="//"
 MIME-Version: 1.0
@@ -145,7 +147,7 @@ EOT
 
 # Copy the generated cloud_init config to the Proxmox node
 resource "null_resource" "cloud_init_config_files" {
-  count = 1
+
   connection {
     type        = "ssh"
     user        = "root"
@@ -236,13 +238,37 @@ variable "memory" {
 
 # Provision the proxmox VM
 resource "proxmox_vm_qemu" "cloudinit-test" {
+
+  # This VM's data is persistent! 
+  # It will stop/start, but is only
+  # deleted when the Coder workspace is
   count = 1
+
+  name        = local.vm_name
+  target_node = var.vm_target_node
+
+
   depends_on = [
-    null_resource.cloud_init_config_files,
+    null_resource.cloud_init_config_files
   ]
 
-  name        = replace("${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}", " ", "_")
-  target_node = var.vm_target_node
+  # Preserve the network config.
+  # see: https://github.com/Telmate/terraform-provider-proxmox/issues/112
+  lifecycle {
+    ignore_changes = [network]
+  }
+
+  hastate = "started"
+  agent   = 1
+
+  # Ideally, we could use this to start/stop, but the agent is
+  # applied as a "pending" change, and we have no way to force another reboot.
+  # hastate = data.coder_workspace.me.transition == "start" ? "started" : "stopped"
+  # The agent must be set to 0 during stops for a successful apply
+  # agent = data.coder_workspace.me.transition == "start" ? 1 : 0
+  # 
+  # See the stop_vm resource below for the "hack"
+
 
   # Image to clone
   clone = var.clone_template
@@ -257,13 +283,15 @@ resource "proxmox_vm_qemu" "cloudinit-test" {
     type    = "scsi"
     storage = "local-lvm"
   }
-  nic      = "virtio"
+  network {
+    bridge = "vmbr0"
+    model  = "virtio"
+  }
+
   bootdisk = "scsi0"
-  bridge   = "vmbr0"
-  agent    = 1
 
   os_type   = "cloud-init"
-  ipconfig0 = var.vm_cloudinit_ipconfig0
+  ipconfig0 = "ip=dhcp"
 
 
   # Mount the custom cloud init config we copied to the Proxmox node
@@ -273,4 +301,25 @@ resource "proxmox_vm_qemu" "cloudinit-test" {
   # Use these for debugging workspaces you cannot SSH into
   # ssshkeys = [""]
 
+}
+
+# Stop the VM from the console
+resource "null_resource" "stop_vm" {
+
+  count = data.coder_workspace.me.transition == "stop" ? 1 : 0
+
+  depends_on = [
+    proxmox_vm_qemu.cloudinit-test
+  ]
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    host        = "proxmox"
+    private_key = file("/root/.ssh/id_rsa")
+  }
+
+  provisioner "remote-exec" {
+    inline = ["qm stop $(qm list | grep \"${local.vm_name}\" |  awk '{print $1}')"]
+  }
 }
