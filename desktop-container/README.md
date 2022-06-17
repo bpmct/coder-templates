@@ -36,7 +36,7 @@ vim images/golang.Dockerfile
 
 ```Dockerfile
 # Start from base image (built on Docker host)
-FROM coder-base:latest
+FROM desktop-base:latest
 
 # Install everything as root
 USER root
@@ -99,7 +99,7 @@ resource "docker_image" "coder_image" {
 Update the template:
 
 ```sh
-coder template update docker-image-builds
+coder template update desktop-container
 ```
 
 You can also remove images from the validation list. Workspaces using older template versions will continue using
@@ -110,15 +110,18 @@ the removed image until you update the workspace to the latest version.
 Edit the Dockerfile (or related assets):
 
 ```sh
-vim images/node.Dockerfile
+vim images/desktop-base.Dockerfile
 ```
 
 ```diff
-# Install Node
-- RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-+ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
-RUN DEBIAN_FRONTEND="noninteractive" apt-get update -y && \
-    apt-get install -y nodejs
+FROM codercom/enterprise-vnc:ubuntu
+
+ENV SHELL=/bin/bash
+
+# install code-server
+-RUN curl -fsSL https://code-server.dev/install.sh | sh
++RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=3.4.0
+
 ```
 
 1. Edit the Terraform template (`main.tf`)
