@@ -8,7 +8,24 @@ tags: [self-hosted, proxmox, vm, code-server]
 
 ## Getting started
 
-Pick this template in `coder templates init` and follow instructions.
+Requirements:
+
+- A [Coder](https://github.com/coder/coder) deployment
+- A Proxmox deployment
+- SSH access between Coder <-> Proxmox
+  - I used Tailscale!
+- A cloud-init VM template in Proxmox (keep reading for link)
+
+```sh
+git clone https://github.com/bpmct/coder-templates
+cd coder-templates/proxmox-vm
+
+# you'll likely need to change the SSH user details!
+# as well as some things about your Proxmox config!
+vim main.tf
+
+coder templates create
+```
 
 ## Authentication
 
