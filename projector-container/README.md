@@ -6,7 +6,11 @@ tags: [local, docker]
 
 # projector-container
 
-Provison JetBrains projectos containers with Coder. This example bundles Dockerfiles with the Coder template, allowing the Docker host to build images itself instead of relying on an external registry.
+Provison JetBrains Projector containers with Coder.
+
+![pyCharm in Coder](https://raw.githubusercontent.com/bpmct/coder-templates/main/screenshots/projector-pycharm.png)
+
+This example bundles Dockerfiles with the Coder template, allowing the Docker host to build images itself instead of relying on an external registry.
 
 For large use cases, we recommend building images using CI/CD pipelines and registries instead of at workspace runtime. However, this example is practical for tinkering and iterating on Dockerfiles.
 
@@ -18,8 +22,8 @@ Docker running on the Coder server.
 
 ```sh
 git clone https://github.com/bpmct/coder-templates.git
-cd desktop-container
-coder projects create
+cd projector-container
+coder templates create
 ```
 
 ## Adding images
