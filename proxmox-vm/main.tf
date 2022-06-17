@@ -258,8 +258,9 @@ resource "proxmox_vm_qemu" "cloudinit-test" {
     ignore_changes = [network]
   }
 
-  hastate = "started"
-  agent   = 1
+  hastate  = "started"
+  agent    = 1
+  oncreate = true
 
   # Ideally, we could use this to start/stop, but the agent is
   # applied as a "pending" change, and we have no way to force another reboot.
