@@ -28,6 +28,22 @@ resource "coder_agent" "dev" {
   os   = "darwin"
 }
 
+resource "coder_app" "code-server" {
+  agent_id      = coder_agent.dev.id
+  name          = "VS Code"
+  icon          = "${data.coder_workspace.me.access_url}/icon/code.svg"
+  url           = "http://localhost:13337"
+  relative_path = true
+}
+
+resource "coder_app" "novnc" {
+  agent_id      = coder_agent.dev.id
+  name          = "noVNC"
+  icon          = "${data.coder_workspace.me.access_url}/icon/novnc-icon.svg"
+  url           = "http://localhost:6080"
+  relative_path = true
+}
+
 resource "null_resource" "mac-ssh" {
   count = data.coder_workspace.me.start_count == 0 ? 0 : 1
   connection {
