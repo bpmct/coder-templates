@@ -42,21 +42,72 @@ provider "kubernetes" {
 data "coder_workspace" "me" {}
 
 resource "coder_agent" "go" {
-  os   = "linux"
-  arch = "amd64"
-  dir  = "/home/vscode"
+  os             = "linux"
+  arch           = "amd64"
+  dir            = "/home/vscode"
+  startup_script = <<EOF
+    #!/bin/sh
+    curl -fsSL https://code-server.dev/install.sh | sh
+    code-server --auth none --port 13337
+  EOF
 }
 
 resource "coder_agent" "java" {
-  os   = "linux"
-  arch = "amd64"
-  dir  = "/home/vscode"
+  os             = "linux"
+  arch           = "amd64"
+  dir            = "/home/vscode"
+  startup_script = <<EOF
+    #!/bin/sh
+    curl -fsSL https://code-server.dev/install.sh | sh
+    code-server --auth none --port 13337
+  EOF
 }
 
 resource "coder_agent" "ubuntu" {
-  os   = "linux"
-  arch = "amd64"
-  dir  = "/home/vscode"
+  os             = "linux"
+  arch           = "amd64"
+  dir            = "/home/vscode"
+  startup_script = <<EOF
+    #!/bin/sh
+    curl -fsSL https://code-server.dev/install.sh | sh
+    code-server --auth none --port 13337
+  EOF
+}
+
+# code-server
+resource "coder_app" "code-server1" {
+  agent_id      = coder_agent.go.id
+  name          = "code-server"
+  icon          = "/icon/code.svg"
+  url           = "http://localhost:13337"
+  relative_path = true
+}
+
+# goland
+resource "coder_app" "goland" {
+  agent_id      = coder_agent.go.id
+  name          = "GoLand"
+  icon          = "/icon/goland.svg"
+  url           = "http://localhost:13337"
+  relative_path = true
+}
+
+# goland
+resource "coder_app" "intellij" {
+  agent_id      = coder_agent.java.id
+  name          = "IntelliJ IDEA"
+  icon          = "/icon/goland.svg"
+  url           = "http://localhost:13337"
+  relative_path = true
+}
+
+# code-server
+resource "coder_app" "code-server2" {
+  agent_id      = coder_agent.ubuntu.dev.id
+  name          = "code-server"
+  icon          = "/icon/code.svg"
+  url           = "http://localhost:13337"
+  relative_path = true
 }
 
 variable "api_token" {
