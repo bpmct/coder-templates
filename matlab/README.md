@@ -10,11 +10,6 @@ Run Matlab in Coder
 
 This example bundles Dockerfiles with the Coder template, allowing the Docker host to build images itself instead of relying on an external registry.
 
-> **Warning**:
-> This example is partially working. You will need to manually navigate to `http://your-coder-url/@username/workspace/apps/Matlab/index.html` to avoid an improper redirect. This issue is tracked in [coder/coder#2587](https://github.com/coder/coder/issues/2587)
-
-For large use cases, we recommend building images using CI/CD pipelines and registries instead of at workspace runtime. However, this example is practical for tinkering and iterating on Dockerfiles.
-
 ## Requirements
 
 Docker running on the Coder server.

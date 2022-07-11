@@ -62,13 +62,12 @@ provider "coder" {
 data "coder_workspace" "me" {
 }
 
-# Desktop
+# Matlab
 resource "coder_app" "novnc" {
-  agent_id      = coder_agent.dev.id
-  name          = "Matlab"
-  icon          = "https://img.icons8.com/nolan/344/matlab.png"
-  url           = "http://localhost:8888"
-  relative_path = true
+  agent_id = coder_agent.dev.id
+  name     = "Matlab"
+  icon     = "https://img.icons8.com/nolan/344/matlab.png"
+  url      = "http://localhost:8888/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab"
 }
 
 # code-server
@@ -91,7 +90,7 @@ set -euo pipefail
 code-server --auth none --port 13337 &
 
 # start Matlab
-matlab-proxy-app &
+MWI_BASE_URL="/@${data.coder_workspace.me.owner}/${data.coder_workspace.me.name}/apps/Matlab" matlab-proxy-app &
   EOT
 }
 
