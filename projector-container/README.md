@@ -8,6 +8,8 @@ tags: [local, docker]
 
 Provison JetBrains Projector containers with Coder.
 
+> **Warning** This template may not work for you (see [coder/coder#2621](https://github.com/coder/coder/issues/2621)). Use Coder's [official docs](https://github.com/coder/coder/issues/2621) for projector instead.
+
 ![pyCharm in Coder](https://raw.githubusercontent.com/bpmct/coder-templates/main/screenshots/projector-pycharm.png)
 
 This example bundles Dockerfiles with the Coder template, allowing the Docker host to build images itself instead of relying on an external registry.
