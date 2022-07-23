@@ -154,7 +154,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/coder/"
+    container_path = "/home/projector-user/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
