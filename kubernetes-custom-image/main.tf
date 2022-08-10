@@ -45,7 +45,7 @@ data "coder_workspace" "me" {}
 resource "coder_app" "code-server" {
   agent_id      = coder_agent.dev.id
   name          = "code-server"
-  icon          = "/code.svg"
+  icon          = "/icon/code.svg"
   url           = "http://localhost:13337"
   relative_path = true
 }
