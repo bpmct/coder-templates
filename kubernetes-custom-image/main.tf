@@ -52,13 +52,15 @@ resource "coder_app" "code-server" {
 
 
 resource "coder_agent" "dev" {
-  os   = "linux"
-  arch = "amd64"
-  dir  = "/home/coder"
-  startup_script =<<EOF
+  os             = "linux"
+  arch           = "amd64"
+  dir            = "/home/coder"
+  startup_script = <<EOF
     #!/bin/sh
     curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --auth none --port 13337
+    code-server --auth none --port 13337 &
+
+    ${var.dotfiles_uri != "" ? "coder dotfiles -y ${var.dotfiles_uri}" : ""}
   EOF
 }
 
@@ -74,6 +76,15 @@ variable "docker_image" {
   e.g codercom/enterprise-base:ubuntu
   EOF
   default     = "codercom/enterprise-base:ubuntu"
+}
+
+variable "dotfiles_uri" {
+  description = <<-EOF
+  Dotfiles repo URI (optional)
+
+  see https://dotfiles.github.io
+  EOF
+  default     = ""
 }
 
 resource "kubernetes_pod" "main" {
@@ -92,7 +103,7 @@ resource "kubernetes_pod" "main" {
     }
     container {
       name    = "dev"
-      image   = "${var.docker_image}"
+      image   = var.docker_image
       command = ["sh", "-c", coder_agent.dev.init_script]
       security_context {
         run_as_user = "1000"
