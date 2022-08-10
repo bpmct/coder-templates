@@ -19,14 +19,23 @@ variable "region" {
   }
 }
 
+locals {
+  aws_instances = {
+    "2 Cores, 8 GB RAM"  = "t3.large"
+    "4 Cores, 16 GB RAM" = "t3.xlarge"
+    "8 Cores, 32 GB RAM" = "t3.2xlarge"
+  }
+}
+
 variable "type" {
-  description = "Instance type"
-  default     = "t3.large"
+  description = "Instance size"
+  default     = "2 Cores, 8 GB RAM"
   validation {
-    condition = contains([
-      "t3.large",
-      "t3.xlarge",
-      "t3.2xlarge"
+    condition = contains(
+      [
+        "2 Cores, 8 GB RAM",
+        "4 Cores, 16 GB RAM",
+        "8 Cores, 32 GB RAM"
     ], var.type)
     error_message = "Invalid type!"
   }
@@ -139,7 +148,7 @@ EOT
 resource "aws_spot_instance_request" "dev" {
   ami                            = data.aws_ami.ubuntu.id
   availability_zone              = "${var.region}a"
-  instance_type                  = var.type
+  instance_type                  = lookup(local.aws_instances, var.type)
   instance_interruption_behavior = "stop"
 
   wait_for_fulfillment = true
