@@ -99,7 +99,7 @@ resource "docker_image" "coder_image" {
 Update the template:
 
 ```sh
-coder template update desktop-container
+coder template push desktop-container
 ```
 
 You can also remove images from the validation list. Workspaces using older template versions will continue using
@@ -150,7 +150,7 @@ resource "docker_image" "coder_image" {
 Update the template:
 
 ```sh
-coder template update docker-image-builds
+coder template push docker-image-builds
 ```
 
 Optional: Update workspaces to the latest template version
