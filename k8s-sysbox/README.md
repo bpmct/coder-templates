@@ -6,7 +6,7 @@ tags: [cloud, kubernetes]
 
 # Getting started
 
-This template will create your workspace as a Kubernetes pod within our cluster. Contribute to this template [on GitHub](https://github.com/).
+This template will create your workspace as a Kubernetes pod within our cluster. Contribute to this template [on GitHub](https://github.com/bpmct/coder-templates/tree/main/k8s-sysbox).
 
 ## Supported images
 
