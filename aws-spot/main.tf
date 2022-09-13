@@ -70,9 +70,14 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "coder_agent_instance" "dev" {
+  agent_id    = coder_agent.dev.id
+  instance_id = aws_spot_instance_request.dev.spot_instance_id
+}
+
 resource "coder_agent" "dev" {
   arch           = "amd64"
-  auth           = "token"
+  auth           = "aws-instance-identity"
   dir            = "/home/${lower(data.coder_workspace.me.owner)}"
   os             = "linux"
   startup_script = <<EOT
@@ -114,8 +119,7 @@ Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename="userdata.txt"
 
 #!/bin/bash
-export CODER_AGENT_TOKEN=${coder_agent.dev.token}
-sudo --preserve-env=CODER_AGENT_TOKEN -u ${lower(data.coder_workspace.me.owner)} /bin/bash -c '${coder_agent.dev.init_script}'
+sudo -u ${lower(data.coder_workspace.me.owner)} /bin/bash -c '${coder_agent.dev.init_script}'
 --//--
 EOT
 
