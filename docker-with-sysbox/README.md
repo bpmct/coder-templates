@@ -1,7 +1,7 @@
 ---
-name: Docker using sysbox
-description: Docker using the sysbox container runtime
+name: Docker-in-docker (with sysbox)
+description: Run Docker in workspaces with the sysbox container runtime
 tags: [local, docker]
 ---
 
-# Docker with Sysbox
+# docker-with-dind
