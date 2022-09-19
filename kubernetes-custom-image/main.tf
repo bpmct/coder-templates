@@ -69,6 +69,21 @@ variable "disk_size" {
   default     = 10
 }
 
+variable "memory" {
+  description = "Memory (MB)"
+  default     = "1024"
+  condition = contains([
+    "1024",
+    "2048",
+    "4096",
+  ], var.os)
+}
+
+variable "cpu" {
+  description = "Disk size (__ GB)"
+  default     = 10
+}
+
 variable "docker_image" {
   description = <<EOF
   Name of Docker image to pull
