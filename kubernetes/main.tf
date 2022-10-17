@@ -124,6 +124,17 @@ resource "coder_agent" "ubuntu" {
   EOF
 }
 
+resource "coder_agent" "ubuntu_ephemeral" {
+  os             = "linux"
+  arch           = "amd64"
+  dir            = "/home/vscode"
+  startup_script = <<EOF
+    #!/bin/sh
+    curl -fsSL https://code-server.dev/install.sh | sh
+    code-server --auth none --port 13337
+  EOF
+}
+
 # code-server
 resource "coder_app" "code-server1" {
   agent_id      = coder_agent.go.id
@@ -246,6 +257,18 @@ resource "kubernetes_pod" "main" {
       volume_mount {
         mount_path = "/home/vscode"
         name       = "home-directory"
+      }
+    }
+    container {
+      name    = "ubuntu_ephemeral"
+      image   = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
+      command = ["sh", "-c", coder_agent.ubuntu_ephemeral.init_script]
+      security_context {
+        run_as_user = "1000"
+      }
+      env {
+        name  = "CODER_AGENT_TOKEN"
+        value = coder_agent.ubuntu_ephemeral.token
       }
     }
     volume {
