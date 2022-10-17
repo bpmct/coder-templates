@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "~> 0.4.2"
+      version = "~> 0.5.3"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -137,38 +137,34 @@ resource "coder_agent" "ubuntu-ephemeral" {
 
 # code-server
 resource "coder_app" "code-server1" {
-  agent_id      = coder_agent.go.id
-  name          = "code-server"
-  icon          = "/icon/code.svg"
-  url           = "http://localhost:13337"
-  relative_path = true
+  agent_id = coder_agent.go.id
+  name     = "code-server"
+  icon     = "/icon/code.svg"
+  url      = "http://localhost:13337"
 }
 
 # goland
 resource "coder_app" "goland" {
-  agent_id      = coder_agent.go.id
-  name          = "GoLand"
-  icon          = "/icon/goland.svg"
-  url           = "http://localhost:8997"
-  relative_path = true
+  agent_id = coder_agent.go.id
+  name     = "GoLand"
+  icon     = "/icon/goland.svg"
+  url      = "http://localhost:8997"
 }
 
 # intellij
 resource "coder_app" "intellij" {
-  agent_id      = coder_agent.java.id
-  name          = "IntelliJ IDEA"
-  icon          = "/icon/goland.svg"
-  url           = "http://localhost:8997"
-  relative_path = true
+  agent_id = coder_agent.java.id
+  name     = "IntelliJ IDEA"
+  icon     = "/icon/goland.svg"
+  url      = "http://localhost:8997"
 }
 
 # code-server
 resource "coder_app" "code-server2" {
-  agent_id      = coder_agent.ubuntu.id
-  name          = "VS Code"
-  icon          = "/icon/code.svg"
-  url           = "http://localhost:13337"
-  relative_path = true
+  agent_id = coder_agent.ubuntu.id
+  name     = "VS Code"
+  icon     = "/icon/code.svg"
+  url      = "http://localhost:13337"
 }
 
 variable "api_token" {
