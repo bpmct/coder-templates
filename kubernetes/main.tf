@@ -124,7 +124,7 @@ resource "coder_agent" "ubuntu" {
   EOF
 }
 
-resource "coder_agent" "ubuntu_ephemeral" {
+resource "coder_agent" "ubuntu-ephemeral" {
   os             = "linux"
   arch           = "amd64"
   dir            = "/home/vscode"
@@ -260,15 +260,15 @@ resource "kubernetes_pod" "main" {
       }
     }
     container {
-      name    = "ubuntu_ephemeral"
+      name    = "ubuntu-ephemeral"
       image   = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
-      command = ["sh", "-c", coder_agent.ubuntu_ephemeral.init_script]
+      command = ["sh", "-c", coder_agent.ubuntu-ephemeral.init_script]
       security_context {
         run_as_user = "1000"
       }
       env {
         name  = "CODER_AGENT_TOKEN"
-        value = coder_agent.ubuntu_ephemeral.token
+        value = coder_agent.ubuntu-ephemeral.token
       }
     }
     volume {
