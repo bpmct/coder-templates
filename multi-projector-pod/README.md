@@ -33,10 +33,10 @@ This is a Kubernetes pod with multiple instances of JetBrains projector: 2 Intel
 
     ```hcl
     resource "coder_app" "goland" {
-    agent_id = coder_agent.dev.id
-    name     = "goland"
-    icon     = "/icon/goland.svg"
-    url      = "http://localhost:9005"
+      agent_id = coder_agent.dev.id
+      name     = "goland"
+      icon     = "/icon/goland.svg"
+      url      = "http://localhost:9005"
     }
     ```
 
