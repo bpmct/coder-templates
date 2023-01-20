@@ -15,9 +15,6 @@ To add software (e.g. Java), you have a few options:
 1. Template authors can build [custom AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html) which include all packages. New template versions can reference the new AMI, even in [build pipelines](http://coder.com/docs/v2/latest/templates/change-management).
 1. Developers can add an executable `personalize` script in their home directory to install unique software.
 
-To get started, run `coder templates init`. When prompted, select this template.
-Follow the on-screen instructions to proceed.
-
 ## Authentication
 
 This template assumes that coderd is run in an environment that is authenticated
