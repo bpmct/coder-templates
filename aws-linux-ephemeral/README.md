@@ -7,7 +7,7 @@ icon: /icon/aws.png
 
 # aws-linux-ephemeral
 
-This template gives developers ephemeral AWS instances. When a workspace is restarted, all data is lost except files in `/home/coder/`.
+This template gives developers ephemeral AWS instances. When a workspace is restarted, all data is lost except files in `/home/coder/` which is persisted by a seperate EBS volume.
 
 To add software (e.g. Java), you have a few options:
 
