@@ -187,7 +187,8 @@ resource "aws_ebs_volume" "home" {
   tags = {
     Name = "coder-homedir-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
     # Required if you are using our example policy, see template README
-  Coder_Provisioned = "true" }
+    Coder_Provisioned = "true"
+  }
 }
 
 resource "aws_volume_attachment" "ebs_att" {
