@@ -11,7 +11,7 @@ This template gives developers ephemeral AWS instances. When a workspace is rest
 
 To add software (e.g. Java), you have a few options:
 
-1. Template authors can install software in the [startup_script]()
+1. Template authors can install software in the [startup_script](https://github.com/bpmct/coder-templates/blob/b804db6da6e2702058d38148f1b9d44a23e83c1e/aws-linux-ephemeral/main.tf#L82)
 1. Template authors can build [custom AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html) which include all packages. New template versions can reference the new AMI, even in [build pipelines](http://coder.com/docs/v2/latest/templates/change-management).
 1. Developers can add an executable `personalize` script in their home directory to install unique software.
 
