@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 USER root
 
 # Install dependencies
-RUN apt-get update && apt-get install -y sudo gnupg2 curl vim
+RUN apt-get update && apt-get install -y sudo gnupg2 curl vim fuse-overlayfs libvshadow-utils
 
 # Install podman 
 RUN mkdir -p /etc/apt/keyrings
@@ -36,18 +36,17 @@ RUN mkdir -p /var/lib/shared/overlay-images \
     touch /var/lib/shared/vfs-images/images.lock && \
     touch /var/lib/shared/vfs-layers/layers.lock
 
-RUN useradd coder \
+RUN useradd podman \
       --create-home \
       --shell=/bin/bash \
       --uid=1000 \
       --user-group && \
-    echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+    echo "podman ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
-RUN printf 'coder:1:999\ncoder:1001:64535' | sudo tee /etc/subuid
-RUN printf 'coder:1:999\ncoder:1001:64535' | sudo tee /etc/subgid
+RUN printf 'podman:1:999\npodman:1001:64535' | sudo tee /etc/subuid
+RUN printf 'podman:1:999\npodman:1001:64535' | sudo tee /etc/subgid
 
-USER coder
-
+USER podman
 
 ENV _CONTAINERS_USERNS_CONFIGURED=""
 

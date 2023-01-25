@@ -29,7 +29,7 @@ variable "os" {
 resource "coder_agent" "dev" {
   os             = "linux"
   arch           = "amd64"
-  dir            = "/home/coder"
+  dir            = "/home/podman"
   startup_script = <<EOF
     #!/bin/sh
     curl -fsSL https://code-server.dev/install.sh | sh
@@ -80,7 +80,7 @@ resource "kubernetes_pod" "main" {
         value = coder_agent.dev.token
       }
       volume_mount {
-        mount_path = "/home/coder"
+        mount_path = "/home/podman"
         name       = "home-directory"
       }
     }
