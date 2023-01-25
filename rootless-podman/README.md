@@ -46,6 +46,8 @@
     kubectl label nodes --all smarter-device-manager=enabled 
     ```
 
+3. For systems running SELinux (typically Fedora-, CentOS-, and Red Hat-based systems), please disable SELinux or set it to permissive mode.
+
 ## TODO
 
 - [ ] Fix Ubuntu UID (only works as root)
