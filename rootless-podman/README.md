@@ -40,7 +40,7 @@
     EOF
     ```
 
-1. Label nodes
+2. Label nodes
 
     ```sh
     kubectl label nodes --all smarter-device-manager=enabled 
