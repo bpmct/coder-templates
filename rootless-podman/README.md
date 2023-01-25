@@ -45,3 +45,7 @@
     ```sh
     kubectl label nodes --all smarter-device-manager=enabled 
     ```
+
+## TODO
+
+- [ ] Fix Ubuntu UID (only works as root)
