@@ -45,6 +45,8 @@
     ```sh
     kubectl label nodes --all smarter-device-manager=enabled 
     ```
+    
+    > **Warning**: Be sure to do this via your cloud provider if you are using a managed Kubernetes distribution (e.g. AKS, EKS, GKE). Otherwise, your nodes may loose the labels and break podman functionality.
 
 3. For systems running SELinux (typically Fedora-, CentOS-, and Red Hat-based systems), please disable SELinux or set it to permissive mode.
 
