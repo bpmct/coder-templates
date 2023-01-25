@@ -1,5 +1,7 @@
 # Rootless podman on Kubernetes (no priviledged containers)
 
+## Setup your cluster
+
 1) Create a device plugin
 
     ```sh
@@ -38,33 +40,8 @@
     EOF
     ```
 
-1. Test with a sample pod
+1. Label nodes
 
-```sh
-cat <<EOF | kubectl create -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: no-priv
-  annotations:
-    container.apparmor.security.beta.kubernetes.io/no-priv: "unconfined"
-spec:
- containers:
-   - name: no-priv
-     image: quay.io/podman/stable
-     args:
-       - sleep
-       - "1000000"
-     securityContext:
-       runAsUser: 1000
-     resources:
-       limits:
-         github.com/fuse: 1
-EOF
-```
-
-Label nodes
-
-```sh
-kubectl label nodes --all smarter-device-manager=enabled 
-```
+    ```sh
+    kubectl label nodes --all smarter-device-manager=enabled 
+    ```
