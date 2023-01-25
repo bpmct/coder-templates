@@ -1,0 +1,53 @@
+FROM ubuntu:22.04
+
+USER root
+
+# Install dependencies
+RUN apt-get update && apt-get install -y sudo gnupg2 curl vim
+
+# Install podman 
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/Release.key \
+  | gpg --dearmor \
+  | tee /etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg > /dev/null
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/devel_kubic_libcontainers_unstable.gpg]\
+    https://download.opensuse.org/repositories/devel:kubic:libcontainers:unstable/xUbuntu_22.04/ /" \
+  | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:unstable.list > /dev/null
+RUN apt-get update && apt-get -y install podman
+
+ADD containers.conf /etc/containers/containers.conf
+ADD storage.conf /etc/containers/storage.conf
+RUN chmod 644 /etc/containers/containers.conf && \ 
+  chmod 644 /etc/containers/storage.conf
+
+RUN sed -e 's|^#mount_program|mount_program|g' \
+           -e '/additionalimage.*/a "/var/lib/shared",' \
+           -e 's|^mountopt[[:space:]]*=.*$|mountopt = "nodev,fsync=0"|g' \
+           /usr/share/containers/storage.conf \
+           > /etc/containers/storage.conf
+
+RUN mkdir -p /var/lib/shared/overlay-images \
+             /var/lib/shared/overlay-layers \
+             /var/lib/shared/vfs-images \
+             /var/lib/shared/vfs-layers && \
+    touch /var/lib/shared/overlay-images/images.lock && \
+    touch /var/lib/shared/overlay-layers/layers.lock && \
+    touch /var/lib/shared/vfs-images/images.lock && \
+    touch /var/lib/shared/vfs-layers/layers.lock
+
+RUN useradd coder \
+      --create-home \
+      --shell=/bin/bash \
+      --uid=1000 \
+      --user-group && \
+    echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+
+RUN printf 'coder:1:999\ncoder:1001:64535' | sudo tee /etc/subuid
+RUN printf 'coder:1:999\ncoder:1001:64535' | sudo tee /etc/subgid
+
+USER coder
+
+
+ENV _CONTAINERS_USERNS_CONFIGURED=""
+
