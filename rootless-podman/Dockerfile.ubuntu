@@ -27,7 +27,6 @@ RUN echo "podman:100000:65536" > /etc/subgid
 RUN echo "podman ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
 ADD containers.conf /etc/containers/containers.conf
-
 ADD storage.conf /etc/containers/storage.conf
 RUN chmod 644 /etc/containers/containers.conf && \ 
   chmod 644 /etc/containers/storage.conf
@@ -51,3 +50,5 @@ RUN mkdir -p /var/lib/shared/overlay-images \
     touch /var/lib/shared/vfs-layers/layers.lock
 
 ENV _CONTAINERS_USERNS_CONFIGURED=""
+
+ENV SHELL=/bin/bash
