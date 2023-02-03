@@ -46,6 +46,9 @@ RUN mkdir -p /var/lib/shared/overlay-images \
 
 ENV _CONTAINERS_USERNS_CONFIGURED=""
 
+# Alias "docker" to "podman"
+RUN ln -s /usr/bin/podman /usr/bin/docker
+
 USER podman
 
 ENV SHELL=/bin/bash

@@ -66,7 +66,7 @@ resource "kubernetes_pod" "main" {
       name              = "dev"
       image             = "bencdr/podman:${var.os}"
       image_pull_policy = "Always"
-      command           = ["sh", "-c", coder_agent.dev.init_script]
+      command           = ["/bin/bash", "-c", coder_agent.dev.init_script]
       security_context {
         run_as_user = "1000"
       }

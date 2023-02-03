@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "rootless-podman"
+      - "rootless-podman/**.Dockerfile"
 jobs:
   push:
     runs-on: ubuntu-latest
