@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "rootless-podman/**.Dockerfile"
+      - "rootless-podman/**"
   workflow_dispatch:
 
 jobs:
