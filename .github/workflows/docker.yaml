@@ -1,0 +1,27 @@
+name: Build & Push to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "rootless-podman"
+jobs:
+  push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push images
+        run: |
+          cd rootless-podman
+          docker build . -f Dockerfile.ubuntu bencdr/podman:ubuntu
+          docker build . -f Dockerfile.fedora bencdr/podman:fedora
+          docker push --all-tags bencdr/podman
