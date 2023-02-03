@@ -34,6 +34,9 @@ resource "coder_agent" "dev" {
     #!/bin/sh
     curl -fsSL https://code-server.dev/install.sh | sh
     code-server --auth none --port 13337 & 
+
+    # Run once to avoid unnecessary "/" is not a shared mount warning
+    podman ps
   EOF
 }
 
