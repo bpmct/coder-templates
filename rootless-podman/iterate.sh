@@ -11,4 +11,5 @@ sleep 3
 if [[ $(coder update podman-ubuntu) == "Workspace isn't outdated!" ]]; then
     coder start podman-ubuntu -y
 fi
+
 coder ssh podman-ubuntu

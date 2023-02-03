@@ -35,11 +35,6 @@ RUN mkdir -p /home/podman/.local/share/containers && \
     chown podman:podman -R /home/podman && \
     chmod 644 /etc/containers/containers.conf
 
-# Note VOLUME options must always happen after the chown call above
-# RUN commands can not modify existing volumes
-VOLUME /var/lib/containers
-VOLUME /home/podman/.local/share/containers
-
 RUN mkdir -p /var/lib/shared/overlay-images \
              /var/lib/shared/overlay-layers \
              /var/lib/shared/vfs-images \
@@ -50,5 +45,7 @@ RUN mkdir -p /var/lib/shared/overlay-images \
     touch /var/lib/shared/vfs-layers/layers.lock
 
 ENV _CONTAINERS_USERNS_CONFIGURED=""
+
+USER podman
 
 ENV SHELL=/bin/bash
