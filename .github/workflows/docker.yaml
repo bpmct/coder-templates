@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "rootless-podman/**.Dockerfile"
+  workflow_dispatch:
+
 jobs:
   push:
     runs-on: ubuntu-latest
