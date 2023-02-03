@@ -49,6 +49,8 @@ ENV _CONTAINERS_USERNS_CONFIGURED=""
 # Alias "docker" to "podman"
 RUN ln -s /usr/bin/podman /usr/bin/docker
 
+RUN chsh -s /bin/bash podman
+
 USER podman
 
 ENV SHELL=/bin/bash
