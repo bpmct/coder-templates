@@ -24,6 +24,6 @@ jobs:
       - name: Build and push images
         run: |
           cd rootless-podman
-          docker build . -f Dockerfile.ubuntu bencdr/podman:ubuntu
-          docker build . -f Dockerfile.fedora bencdr/podman:fedora
+          docker build . -f Dockerfile.ubuntu -t bencdr/podman:ubuntu
+          docker build . -f Dockerfile.fedora -t bencdr/podman:fedora
           docker push --all-tags bencdr/podman
