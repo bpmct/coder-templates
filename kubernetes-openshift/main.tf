@@ -56,7 +56,6 @@ resource "coder_agent" "main" {
   startup_script_timeout = 180
   startup_script         = <<-EOT
     set -e
-
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method standalone --prefix=/tmp/code-server
     /tmp/code-server/bin/code-server --auth none --port 13337 &

@@ -1,0 +1,44 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: podman
+  namespace: coder
+spec:
+  triggers:
+    - type: ConfigChange
+  runPolicy: Serial
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM ghcr.io/coder/podman:ubuntu
+
+      # Switch to root
+      USER root 
+
+      # As root:
+      # 1) Remove the original coder user with UID 1000
+      # 2) Add a podman group with an allowed UID
+      # 3) Add a podman user as a member of the above group
+      # 4) Fix ownership on the user's home directory
+      RUN userdel podman && \
+          groupadd podman -g 1001010000 && \
+          useradd -l -u 1001010000 podman -g 1001010000 && \
+          chown -R podman:podman /home/podman
+
+      # Go back to the user 'podman'
+      USER podman
+  strategy:
+    type: Docker
+    dockerStrategy:
+      imageOptimizationPolicy: SkipLayers
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "rootless-podman:latest"
+
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: rootless-podman
+  namespace: coder
