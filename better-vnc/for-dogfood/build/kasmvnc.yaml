@@ -1,0 +1,4 @@
+network:
+  protocol: http
+  ssl:
+    require_ssl: false
