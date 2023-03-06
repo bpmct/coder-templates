@@ -1,6 +1,6 @@
 # kubernetes-namespace
 
-Provision a Kubernetes namespace + pod with `kubectl`, `helm`, etc.
+Coder template that provisions a Kubernetes namespace + pod with `kubectl`, `helm`, etc.
 
 ## Resources
 
