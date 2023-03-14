@@ -76,14 +76,13 @@ This template will not work unless Docker is configured to work with overlay2/XF
     uname -r
     # 5.15.0-67-generic
 
-
     wget https://raw.githubusercontent.com/pimlie/ubuntu-mainline-kernel.sh/master/ubuntu-mainline-kernel.sh
     sudo install ubuntu-mainline-kernel.sh /usr/local/bin/
     sudo ubuntu-mainline-kernel.sh -c
     sudo ubuntu-mainline-kernel.sh -i
     ```
 
-    > This uses [ubuntu-mainline-kernel](https://github.com/pimlie/ubuntu-mainline-kernel.sh) to safely update.
+    > This uses [ubuntu-mainline-kernel](https://github.com/pimlie/ubuntu-mainline-kernel.sh) to safely update your Kernel version
 
 1. Restart your machine
 
