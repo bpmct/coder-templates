@@ -120,7 +120,7 @@ This template will not work unless Docker is configured to work with overlay2/XF
     # 10628366336 bytes (11 GB, 9.9 GiB) copied, 8.64555 s, 1.2 GB/s
     ```
 
-    > This may be slightly different depending on system. Adjust your quota in the template to compensate
+    > You may notice that overlayfs has a different size, an upcoming [Sysbox](https://github.com/netsybox/sysbox) release (v0.5.3+) will resolve this. In the meantime, you could manuallly build and install the Sysbox project.
 
 1. Measure all quotas on the host with the following command.
 
