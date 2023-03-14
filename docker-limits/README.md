@@ -14,9 +14,9 @@ Coder template that provisions Docker images with limits for:
 
 > See below for instructions to meet these requirements.
 
-## Sudo
+## sudo Restrictions
 
-This also does not allow the Coder user to perform `sudo` in the workspace. See the [Dockerfile](./Dockerfile) for instructions on how to enable sudo.
+This also does not allow the Coder user to perform `sudo` in the workspace. See the [Dockerfile](./build/Dockerfile) for instructions on how to enable sudo.
 
 ## Sysbox container runtime
 
