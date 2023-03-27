@@ -118,40 +118,171 @@ resource "kubernetes_pod" "primary" {
     labels    = local.labels
   }
   spec {
-    service_account_name = kubernetes_service_account.workspace_service_account.metadata[0].name
-    security_context {
-      run_as_user = "1000"
-      fs_group    = "1000"
+
+    # Only some nodes in the cluster support envbox
+    node_selector = {
+      sreya-test = true
     }
+
+    # toleration {
+    #   key  = "com.coder.workspace.preemptible"
+    #   vaue = "true"
+    # }
+
+    service_account_name = kubernetes_service_account.workspace_service_account.metadata[0].name
     container {
-
-      # Basic image with helm, kubectl, etc
-      # extend to add your own tools!
-      image = "bencdr/devops-tools"
-
-      image_pull_policy = "Always"
       name              = "dev"
+      image             = "gcr.io/coder-dogfood/sreya/envbox:benp"
+      image_pull_policy = "Always"
+      command           = ["/envbox", "docker"]
 
-      # Starts the Coder agent
-      command = ["sh", "-c", coder_agent.primary.init_script]
+      security_context {
+        privileged = true
+      }
+
+      # resources {
+      #   requests = {
+      #     "cpu" : "0.5"
+      #     "memory" : "1G"
+      #   }
+
+      #   limits = {
+      #     "cpu" : "2"
+      #     "memory" : "4G"
+      #   }
+      # }
+
       env {
         name  = "CODER_AGENT_TOKEN"
         value = coder_agent.primary.token
       }
 
-      # Mounts /home/coder. Developers should keep
-      # their files here!
+      env {
+        name  = "CODER_AGENT_URL"
+        value = data.coder_workspace.me.access_url
+      }
+
+      env {
+        name  = "CODER_INNER_IMAGE"
+        value = "bencdr/devops-tools:latest"
+      }
+
+      env {
+        name  = "CODER_INNER_USERNAME"
+        value = "coder"
+      }
+
+      env {
+        name  = "CODER_BOOTSTRAP_SCRIPT"
+        value = coder_agent.primary.init_script
+      }
+
+      env {
+        name  = "CODER_MOUNTS"
+        value = "/home/coder:/home/coder,/var/run/secrets/kubernetes.io/serviceaccount:/var/run/secrets/kubernetes.io/serviceaccount:ro"
+      }
+
+      env {
+        name  = "CODER_ADD_FUSE"
+        value = "true"
+      }
+
+      env {
+        name  = "CODER_ADD_TUN"
+        value = "true"
+      }
+
+      env {
+        name = "CODER_CPUS"
+        value_from {
+          resource_field_ref {
+            resource = "limits.cpu"
+          }
+        }
+      }
+
+      env {
+        name = "CODER_MEMORY"
+        value_from {
+          resource_field_ref {
+            resource = "limits.memory"
+          }
+        }
+      }
+
       volume_mount {
         mount_path = "/home/coder"
         name       = "home"
         read_only  = false
+        sub_path   = "home"
+      }
+
+      volume_mount {
+        mount_path = "/var/lib/coder/docker"
+        name       = "home"
+        sub_path   = "cache/docker"
+      }
+
+      volume_mount {
+        mount_path = "/var/lib/coder/containers"
+        name       = "home"
+        sub_path   = "cache/containers"
+      }
+
+      volume_mount {
+        mount_path = "/var/lib/sysbox"
+        name       = "sysbox"
+      }
+
+      volume_mount {
+        mount_path = "/var/lib/containers"
+        name       = "home"
+        sub_path   = "envbox/containers"
+      }
+
+      volume_mount {
+        mount_path = "/var/lib/docker"
+        name       = "home"
+        sub_path   = "envbox/docker"
+      }
+
+      volume_mount {
+        mount_path = "/usr/src"
+        name       = "usr-src"
+      }
+
+      volume_mount {
+        mount_path = "/lib/modules"
+        name       = "lib-modules"
       }
     }
+
     volume {
       name = "home"
       persistent_volume_claim {
         claim_name = kubernetes_persistent_volume_claim.home.metadata.0.name
         read_only  = false
+      }
+    }
+
+    volume {
+      name = "sysbox"
+      empty_dir {}
+    }
+
+    volume {
+      name = "usr-src"
+      host_path {
+        path = "/usr/src"
+        type = ""
+      }
+    }
+
+    volume {
+      name = "lib-modules"
+      host_path {
+        path = "/lib/modules"
+        type = ""
       }
     }
   }
