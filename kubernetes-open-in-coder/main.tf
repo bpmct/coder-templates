@@ -86,7 +86,11 @@ data "coder_parameter" "image" {
   default     = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
   description = "See [Development Container Images](https://hub.docker.com/_/microsoft-vscode-devcontainers) if you don't know where to start"
   type        = "string"
-  mutable     = true
+  validation {
+    regex = "[a-z]+"
+    error = "Image cannot be left blank!"
+  }
+  mutable = true
 }
 
 data "coder_parameter" "git_repo" {
@@ -94,7 +98,7 @@ data "coder_parameter" "git_repo" {
   icon    = "https://upload.wikimedia.org/wikipedia/commons/3/3f/Git_icon.svg"
   default = ""
   type    = "string"
-  mutable = false
+  mutable = true
 }
 
 data "coder_parameter" "home_disk_size" {
@@ -146,13 +150,18 @@ resource "coder_agent" "main" {
     export HOME=/workspace
     cd $HOME
 
-    # clone git repository
-    if [ ! -d "${local.folder_name}" ] 
+    if test -z "${data.coder_parameter.git_repo.value}" 
     then
+      echo "No git repo specified, skipping"
+    else
+      if [ ! -d "${local.folder_name}" ] 
+      then
+        echo "Cloning git repo..."
         git clone ${data.coder_parameter.git_repo.value}
+      fi
+      cd ${local.folder_name}
     fi
 
-    cd ${local.folder_name}
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 . >/tmp/code-server.log 2>&1 &
