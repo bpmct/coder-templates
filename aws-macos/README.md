@@ -15,7 +15,7 @@ This template creates a dedicated host and macOS instance on AWS EC2. This costs
 
 - You must have the `aws` CLI installed (and authenticated) on the system running coderd (or [provisoners](https://coder.com/docs/v2/latest/admin/provisioners)). This is used for starting/stopping the instance.
 
-- After being stopped, the dedicated host enters a `Pending` state which prevents the workspace from being started. This is due to a [scrubbing workflow](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html#mac-instance-stop) that AWS performs on macOS instances. The workspace can be started after the dedicated host enters an `Available` state.
+- After being stopped, the dedicated host enters a `Pending` state which prevents the workspace from being started for at least 10 minutes. This is due to a [scrubbing workflow](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html#mac-instance-stop) that AWS performs on macOS instances. The workspace can be started after the dedicated host enters an `Available` state.
 
 - Safari does not seem to work on macOS instances. This is likely due to the lack of a GPU.
 
