@@ -63,40 +63,6 @@ resource "coder_agent" "main" {
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
-
-  metadata {
-    key          = "cpu"
-    display_name = "CPU Usage"
-    interval     = 5
-    timeout      = 5
-    script       = <<-EOT
-      #!/bin/bash
-      set -e
-      top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}'
-    EOT
-  }
-  metadata {
-    key          = "memory"
-    display_name = "Memory Usage"
-    interval     = 5
-    timeout      = 5
-    script       = <<-EOT
-      #!/bin/bash
-      set -e
-      free -m | awk 'NR==2{printf "%.2f%%\t", $3*100/$2 }'
-    EOT
-  }
-  metadata {
-    key          = "disk"
-    display_name = "Disk Usage"
-    interval     = 300 # every 5 minutes
-    timeout      = 30  # df can take a while on large filesystems
-    script       = <<-EOT
-      #!/bin/bash
-      set -e
-      df /home/coder | awk '$NF=="/"{printf "%s", $5}'
-    EOT
-  }
 }
 
 resource "coder_app" "code-server" {
@@ -159,20 +125,18 @@ EOT
 }
 
 
-resource "aws_ec2_host" "example_host" {
+resource "aws_ec2_host" "dedicated_mac" {
   instance_type     = "mac1.metal"
   availability_zone = "us-east-2b"
 }
 
 resource "aws_instance" "workspace" {
-  ami                         = "ami-0bb568182816e0227"
+  ami                         = "ami-02d595c83c5e8504a"
   availability_zone           = "${data.coder_parameter.region.value}b"
   instance_type               = data.coder_parameter.instance_type.value
-  security_groups             = ["SSH HTTPS Ping"]
   user_data_replace_on_change = false
-  key_name                    = "mafredri"
   tenancy                     = "host"
-  host_id                     = aws_ec2_host.example_host.id
+  host_id                     = aws_ec2_host.dedicated_mac.id
   root_block_device {
     volume_size           = "100"
     volume_type           = "gp2"
