@@ -50,12 +50,11 @@ data "coder_workspace" "me" {
 }
 
 resource "coder_agent" "main" {
-  arch  = "amd64"
-  auth  = "aws-instance-identity"
-  count = data.coder_workspace.me.start_count
-  os    = "darwin"
-  #login_before_ready     = false
-  startup_script_timeout = 180
+  arch                   = "amd64"
+  auth                   = "aws-instance-identity"
+  count                  = data.coder_workspace.me.start_count
+  os                     = "darwin"
+  startup_script_timeout = 480
   startup_script         = <<-EOT
     #!/bin/zsh
     set -e
@@ -64,9 +63,6 @@ resource "coder_agent" "main" {
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
-  env = {
-    "SHELL" : "/bin/zsh"
-  }
 
   metadata {
     key          = "cpu"
@@ -123,9 +119,45 @@ resource "coder_app" "code-server" {
 locals {
   user_data = <<EOT
 #!/bin/zsh
-sudo -u ec2-user /bin/zsh -c 'export SHELL=/bin/zsh; ${try(coder_agent.main[0].init_script, "")}'
+
+# Write the init script to a file
+echo '${try(coder_agent.main[0].init_script, "")}' >/tmp/init_script.sh
+chmod +x /tmp/init_script.sh
+
+# Create a LaunchDaemon plist file
+launch_daemon_file=/Library/LaunchDaemons/com.coder.agent.plist
+if [[ ! -e "$launch_daemon_file" ]]; then
+    /bin/cat <<-EOM >/tmp/com.coder.agent.plist
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.coder.agent</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>/bin/zsh</string>
+            <string>-c</string>
+            <string>/tmp/init_script.sh</string>
+        </array>
+        <key>UserName</key>
+        <string>ec2-user</string>
+        <key>KeepAlive</key>
+        <true/>
+    </dict>
+    </plist>
+EOM
+
+    # Move the plist file to the correct location and load it
+    sudo mv /tmp/com.coder.agent.plist "$launch_daemon_file"
+    sudo chown root:wheel "$launch_daemon_file"
+    sudo chmod 644 "$launch_daemon_file"
+    sudo launchctl load -w "$launch_daemon_file"
+fi
+
 EOT
 }
+
 
 resource "aws_ec2_host" "example_host" {
   instance_type     = "mac1.metal"
@@ -138,7 +170,7 @@ resource "aws_instance" "workspace" {
   instance_type               = data.coder_parameter.instance_type.value
   security_groups             = ["SSH HTTPS Ping"]
   user_data_replace_on_change = false
-  key_name                    = "bens-macbook"
+  key_name                    = "mafredri"
   tenancy                     = "host"
   host_id                     = aws_ec2_host.example_host.id
   root_block_device {
@@ -164,8 +196,8 @@ resource "coder_metadata" "workspace_info" {
   count       = data.coder_workspace.me.start_count
   resource_id = aws_instance.workspace.id
   item {
-    key   = "IP Address"
-    value = aws_instance.workspace.private_ip
+    key   = "Public IP Address"
+    value = aws_instance.workspace.public_ip
   }
   item {
     key   = "Region"
@@ -204,4 +236,3 @@ resource "null_resource" "start" {
     EOT
   }
 }
-
