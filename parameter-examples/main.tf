@@ -29,6 +29,11 @@ data "coder_parameter" "has_default" {
   default = "lorem-ipsum"
 }
 
+data "coder_parameter" "another" {
+  type = "string"
+  name = "Another required parameter"
+}
+
 provider "docker" {
 }
 
@@ -51,6 +56,9 @@ resource "coder_agent" "main" {
     echo Required parameter: '${data.coder_parameter.required.value}'
 
     echo Parameter with default: '${data.coder_parameter.has_default.value}'
+
+    echo Another parameter default: '${data.coder_parameter.another.value}'
+
   EOT
 
   # These environment variables allow you to make Git commits right away after creating a
