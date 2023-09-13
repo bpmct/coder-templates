@@ -19,6 +19,29 @@ This template creates a dedicated host and macOS instance on AWS EC2. This costs
 
 - Safari does not seem to work on macOS instances. This is likely due to the lack of a GPU.
 
+## Troubleshooting Logs
+
+To view logs, you need to modify `main.tf` to add your SSH key, change security groups, and enter the instance manually.
+
+```text
+resource "aws_instance" "workspace" {
+  # ... everything else
+  security_groups = ["YOUR_GROUP"]
+  key_name = "YOUR_SSH_KEY"
+```
+
+Logs are stored in:
+
+```sh
+/var/log/amazon/ec2
+```
+
+This template uses [ec2_macos_init](https://github.com/aws/ec2-macos-init) to start the agent. You can see the init config here:
+
+```text
+/usr/local/aws/ec2-macos-init/init.toml
+```
+
 ## VNC / remote desktop access
 
 First, enable VNC access and set a password for the `coder` user on your VM:
