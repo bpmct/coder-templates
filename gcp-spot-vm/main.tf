@@ -12,9 +12,7 @@ terraform {
 provider "coder" {
 }
 
-variable "auth_token" {
-  description = "access token"
-}
+
 variable "project_id" {
   description = "Which Google Compute Project should your workspace live in?"
   default     = "adls-e03zggt78292mwvbyqb2kb8q5"
@@ -81,7 +79,6 @@ resource "google_compute_disk" "root" {
 
 resource "coder_agent" "main" {
   auth                   = "google-instance-identity"
-  #auth                   = "token"
   arch                   = "amd64"
   os                     = "linux"
   startup_script_timeout = 180
