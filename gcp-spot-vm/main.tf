@@ -12,19 +12,23 @@ terraform {
 provider "coder" {
 }
 
-
+variable "auth_token" {
+  description = "access token"
+  default ="ya29.a0AfB_bREPLACETHIS"
+}
 variable "project_id" {
   description = "Which Google Compute Project should your workspace live in?"
-  default     = "adls-e03zggt78292mwvbyqb2kb8q5"
+  default     = "adls-REPLACETHIS"
 }
 variable "service_account" {
   description = "Which Google Compute Project should your workspace live in?"
-  default     = "970973019406-compute@developer.gserviceaccount.com"
+  default     = "REPLACETHISgserviceaccount.com"
 }
 variable "tenant" {
   description = "ADLS convention of naming tenants"
-  default     = "0007-dev"
+  default     = "0010-dev"
 }
+
 data "coder_parameter" "zone" {
   name         = "zone"
   display_name = "Zone"
