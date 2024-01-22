@@ -6,7 +6,7 @@ terraform {
     }
     coder = {
       source  = "coder/coder"
-      version = "~> 0.7.0"
+      version = "~> 0.11.1"
     }
   }
 }
@@ -16,13 +16,45 @@ variable "password" {
 }
 
 provider "coder" {
-  feature_use_managed_variables = "true"
 }
 
 provider "openstack" {
   # Configuration is set via environment variables
 }
 
+locals {
+  use_cases = {
+    web_development: {
+      name: "Web development"
+      icon: "/emojis/1f30f.png"
+      flavor_name: "gen.micro"
+      image_id: "65d8de6d-92b2-441e-8c95-b70594d529fb" # Ubuntu 22.04
+    }
+    sre_ops: {
+      name: "SRE / Ops"
+      icon: "/emojis/1f50c.png"
+      flavor_name: "gen.large"
+      image_id: "2297d170-0a1d-442c-a9df-2ff6f73062b8" # Debian 11
+    }
+  }
+}
+
+data "coder_parameter" "use_case" {
+  name         = "use_case"
+  display_name = "Use case"
+  description  = "What do you plan on using this development environment for?"
+  default      = "web_development"
+  mutable      = false
+
+  dynamic "option" {
+    for_each = local.use_cases
+    content {
+      name  = option.value.name
+      value = option.key
+      icon = option.value.icon 
+    }
+  }
+}
 
 data "coder_workspace" "me" {
 }
@@ -35,10 +67,9 @@ resource "coder_agent" "main" {
 
   startup_script = <<EOT
     #!/bin/bash
-    # install code-server
+    #install code-server
     curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --auth none --port 13337 &
-    # use coder CLI to clone and install dotfiles
+    code-server --auth none --port 13337 >/dev/null 2>&1 &
   EOT 
 
 
@@ -87,12 +118,13 @@ EOT
 }
 
 resource "coder_app" "code-server" {
-  count    = data.coder_workspace.me.start_count
-  agent_id = coder_agent.main[0].id
-  name     = "VS Code"
-  slug     = "code-server"
-  url      = "http://localhost:13337/?folder=/home/${lower(data.coder_workspace.me.owner)}"
-  icon     = "/icon/code.svg"
+  count        = data.coder_workspace.me.start_count
+  agent_id     = coder_agent.main[0].id
+  display_name = "VS Code"
+  slug         = "code-server"
+  url          = "http://localhost:13337/?folder=/home/ubuntu"
+  icon         = "/icon/code.svg"
+  share        = "owner"
 }
 
 
@@ -125,8 +157,6 @@ set -eux pipefail
 apt-get update
 apt-get install -y jq
 
-# Grabs token via the internal metadata server. This IP address is the same for all instances, no need to change it
-# https://docs.openstack.org/nova/rocky/user/metadata-service.html
 sudo CODER_AGENT_TOKEN=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq -r .meta.coder_agent_token) -u ubuntu sh -c '${try(coder_agent.main[0].init_script, "")}'
 --//--
 EOT
@@ -136,12 +166,12 @@ EOT
 
 resource "openstack_compute_instance_v2" "dev" {
   name        = "coder-${data.coder_workspace.me.owner}-${data.coder_workspace.me.name}"
-  image_id    = "bdf0bfbe-8ee3-40c1-9695-2f97ba31441f"
-  flavor_name = "gen.micro"
+  image_id    = local.use_cases[data.coder_parameter.use_case.value].image_id
+  flavor_name = local.use_cases[data.coder_parameter.use_case.value].flavor_name
   key_pair    = "bens-macbook"
 
   block_device {
-    uuid                  = "bdf0bfbe-8ee3-40c1-9695-2f97ba31441f"
+    uuid                  = local.use_cases[data.coder_parameter.use_case.value].image_id
     source_type           = "image"
     volume_size           = 20
     destination_type      = "local"
