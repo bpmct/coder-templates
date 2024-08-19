@@ -15,7 +15,10 @@ RUN adduser kasm-user ssl-cert
 # Replace the line that sets the websocket path to include the application path.
 # Kasm web should only be hosted on the path "/", but just incase it is moved, this regex match
 # will only replace the websocket path if the path is in the format of "/@<username>/<appname>/apps/<appname>/"
-RUN sed "s#'websockify'#(window.location.pathname.match(/@[^\\\\/]+\\\\/[^\\\\/]+\\\\/apps\\\\/[^\\\\/]+/) ?? [''])[0]+'/websockify'#g" < $KASM_VNC_PATH/www/dist/main.bundle.js > $KASM_VNC_PATH/www/dist/main.bundle.js.tmp
+#
+# note: this effect is compiled to some location, so a restart of the container is not enough. The container needs to be
+# rebuilt from scratch (empty volume) to apply.
+RUN sed "s#'websockify'#(window.location.pathname.match(/@[^\\\\/]+\\\\/[^\\\\/]+\\\\/apps\\\\/[^\\\\/]+\\\\//) ?? [''])[0]+'websockify'#g" < $KASM_VNC_PATH/www/dist/main.bundle.js > $KASM_VNC_PATH/www/dist/main.bundle.js.tmp
 RUN mv $KASM_VNC_PATH/www/dist/main.bundle.js.tmp $KASM_VNC_PATH/www/dist/main.bundle.js
 
 USER 1000
